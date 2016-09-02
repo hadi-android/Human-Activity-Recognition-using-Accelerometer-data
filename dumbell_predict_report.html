@@ -151,9 +151,16 @@ data_te=data_te[,-c(1:7)]</code></pre>
 <pre class="r"><code>ctrl &lt;- trainControl(method = &quot;repeatedcv&quot;, number = 10, savePredictions = TRUE)</code></pre>
 <p>Train using random forests and using all features</p>
 <pre class="r"><code>rfmodel2 = train(data_tr$classe ~., data = data_tr, method = &quot;rf&quot;, verbose = FALSE, trControl=ctrl)</code></pre>
-<p>Predict class from testing set using the newly obtained model</p>
+<p>Here is the result of the built model. It shows that the best accuracy was obtained for mtry = 2 with accuracy of 0.84.This accuracy also considers the out-of-sample error.</p>
+<p>mtry Accuracy Kappa Accuracy SD Kappa SD<br />
+ 2 0.8424984 0.8007024 0.003803663 0.004747850<br />
+ 3 0.8379626 0.7949628 0.004125241 0.005164086<br />
+ 5 0.8266954 0.7806995 0.004854413 0.006090015</p>
+<p>Accuracy was used to select the optimal model using the largest value. The final value used for the model was mtry = 2.</p>
+<p>Next, predict class from testing set using the newly obtained model</p>
 <pre class="r"><code>pred = predict(rfmodel2,data_te[,-53])
 pred</code></pre>
+<p>[1] B A B A A E D B A A A C B A E E C B B B</p>
 </div>
 
 

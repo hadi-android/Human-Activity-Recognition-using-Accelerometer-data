@@ -60,11 +60,21 @@ Train using random forests and using all features
 ```{r, eval=FALSE}
 rfmodel2 = train(data_tr$classe ~., data = data_tr, method = "rf", verbose = FALSE, trControl=ctrl)
 ```
+Here is the result of the built model. It shows that the best accuracy was obtained for mtry = 2 with accuracy of 0.84.This accuracy also considers the out-of-sample error.
 
-Predict class from testing set using the newly obtained model
+  mtry  Accuracy   Kappa      Accuracy SD  Kappa SD   			
+  2     0.8424984  0.8007024  0.003803663  0.004747850			
+  3     0.8379626  0.7949628  0.004125241  0.005164086			
+  5     0.8266954  0.7806995  0.004854413  0.006090015			
+
+Accuracy was used to select the optimal model using  the largest value.
+The final value used for the model was mtry = 2.
+
+Next, predict class from testing set using the newly obtained model
 ```{r, eval=FALSE}
 pred = predict(rfmodel2,data_te[,-53])
 pred
 ```
+ [1] B A B A A E D B A A A C B A E E C B B B
 
 
