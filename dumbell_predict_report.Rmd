@@ -1,0 +1,70 @@
+---
+title: "Dumbell exercise mistake detection"
+author: "Hadi Tadayyon"
+date: "September 2, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+Clear all variables and load the required libraries
+```{r, warning=FALSE}
+rm(list=ls(all=T))
+library(caret)
+library(e1071)
+```
+
+Read training set
+```{r}
+data_tr = read.csv("pml-training.csv",header=T)
+```
+
+Remove NA and "" columns
+```{r}
+data_tr = data_tr[,-which(data_tr[1,]=="")]
+data_tr = data_tr[,-which(is.na(data_tr[1,]))]
+```
+
+Read testing set
+```{r}
+data_te = read.csv("pml-testing.csv", header=T)
+```
+
+Remove NA columns frin testing set
+```{r}
+data_te = data_te[,-which(is.na(data_te[1,]))]
+```
+
+Remove non-relevant columns related to person, date, time stamp, and window
+```{r}
+data_tr=data_tr[,-c(1:7)]
+data_te=data_te[,-c(1:7)]
+```
+
+Check if the number of columns of the two data sets are the same
+```{r}
+dim(data_tr)
+dim(data_te)
+```
+
+Set up a 10-fold cross validation
+```{r}
+ctrl <- trainControl(method = "repeatedcv", number = 10, savePredictions = TRUE)
+```
+
+Train using random forests and using all features
+```{r, eval=FALSE}
+rfmodel2 = train(data_tr$classe ~., data = data_tr, method = "rf", verbose = FALSE, trControl=ctrl)
+```
+
+Predict class from testing set using the newly obtained model
+```{r, eval=FALSE}
+pred = predict(rfmodel2,data_te[,-53])
+pred
+```
+
+
