@@ -129,9 +129,11 @@ $(document).ready(function () {
 library(caret)</code></pre>
 <pre><code>## Loading required package: lattice</code></pre>
 <pre><code>## Loading required package: ggplot2</code></pre>
-<pre class="r"><code>library(e1071)</code></pre>
-<p>Read training set</p>
-<pre class="r"><code>data_tr = read.csv(&quot;pml-training.csv&quot;,header=T)</code></pre>
+<pre class="r"><code>library(e1071)
+load(&quot;data_subsamp.RData&quot;)</code></pre>
+<p>Read training set, save the index vector which will be used later to subsample from the training set</p>
+<pre class="r"><code>data_tr = read.csv(&quot;pml-training.csv&quot;,header=T)
+X = data_tr$X</code></pre>
 <p>Remove NA and “” columns</p>
 <pre class="r"><code>data_tr = data_tr[,-which(data_tr[1,]==&quot;&quot;)]
 data_tr = data_tr[,-which(is.na(data_tr[1,]))]</code></pre>
@@ -147,20 +149,48 @@ data_te=data_te[,-c(1:7)]</code></pre>
 <pre><code>## [1] 19622    53</code></pre>
 <pre class="r"><code>dim(data_te)</code></pre>
 <pre><code>## [1] 20 53</code></pre>
+<p>Since the training set is very large and memory prohibiting for some computers, I will sample 1000 rows randomly from the training set</p>
+<pre class="r"><code>samp = sample(X,1000)
+data_tr = data_tr[samp,]</code></pre>
 <p>Set up a 10-fold cross validation</p>
 <pre class="r"><code>ctrl &lt;- trainControl(method = &quot;repeatedcv&quot;, number = 10, savePredictions = TRUE)</code></pre>
 <p>Train using random forests and using all features</p>
 <pre class="r"><code>rfmodel2 = train(data_tr$classe ~., data = data_tr, method = &quot;rf&quot;, verbose = FALSE, trControl=ctrl)</code></pre>
-<p>Here is the result of the built model. It shows that the best accuracy was obtained for mtry = 2 with accuracy of 0.84.This accuracy also considers the out-of-sample error.</p>
-<p>mtry Accuracy Kappa Accuracy SD Kappa SD<br />
- 2 0.8424984 0.8007024 0.003803663 0.004747850<br />
- 3 0.8379626 0.7949628 0.004125241 0.005164086<br />
- 5 0.8266954 0.7806995 0.004854413 0.006090015</p>
-<p>Accuracy was used to select the optimal model using the largest value. The final value used for the model was mtry = 2.</p>
+<p>Here is the result of the built model. It shows that the best accuracy was obtained for mtry = 2 with accuracy of 0.89.This accuracy also considers the out-of-sample error using cross validation.</p>
+<pre class="r"><code>print(rfmodel2)</code></pre>
+<pre><code>## Random Forest 
+## 
+## 1000 samples
+##   52 predictor
+##    5 classes: 'A', 'B', 'C', 'D', 'E' 
+## 
+## No pre-processing
+## Resampling: Cross-Validated (10 fold, repeated 1 times) 
+## Summary of sample sizes: 900, 901, 901, 901, 898, 900, ... 
+## Resampling results across tuning parameters:
+## 
+##   mtry  Accuracy   Kappa      Accuracy SD  Kappa SD  
+##    2    0.8949188  0.8667716  0.04234046   0.05377356
+##   27    0.8949093  0.8668184  0.04491695   0.05681443
+##   52    0.8859085  0.8553620  0.04259725   0.05403238
+## 
+## Accuracy was used to select the optimal model using  the largest value.
+## The final value used for the model was mtry = 2.</code></pre>
 <p>Next, predict class from testing set using the newly obtained model</p>
-<pre class="r"><code>pred = predict(rfmodel2,data_te[,-53])
-pred</code></pre>
-<p>[1] B A B A A E D B A A A C B A E E C B B B</p>
+<pre class="r"><code>pred = predict(rfmodel2,data_te[,-53])</code></pre>
+<pre><code>## Loading required package: randomForest</code></pre>
+<pre><code>## Warning: package 'randomForest' was built under R version 3.2.4</code></pre>
+<pre><code>## randomForest 4.6-12</code></pre>
+<pre><code>## Type rfNews() to see new features/changes/bug fixes.</code></pre>
+<pre><code>## 
+## Attaching package: 'randomForest'</code></pre>
+<pre><code>## The following object is masked from 'package:ggplot2':
+## 
+##     margin</code></pre>
+<pre class="r"><code>pred</code></pre>
+<pre><code>##  [1] B A B A A E D D A A C C B A E E A B B B
+## Levels: A B C D E</code></pre>
+<p>This prediction is 90% accurate (I got 18/20 values right on the quiz) so it’s not bad given the limited number of samples used.</p>
 </div>
 
 
