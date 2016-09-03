@@ -122,18 +122,20 @@ $(document).ready(function () {
 </div>
 
 
-<div id="r-markdown" class="section level2">
-<h2>R Markdown</h2>
+<div id="load-the-reuiqred-libraries-and-read-in-the-data-files" class="section level2">
+<h2>Load the reuiqred libraries and read in the data files</h2>
 <p>Clear all variables and load the required libraries</p>
 <pre class="r"><code>rm(list=ls(all=T))
 library(caret)</code></pre>
 <pre><code>## Loading required package: lattice</code></pre>
 <pre><code>## Loading required package: ggplot2</code></pre>
-<pre class="r"><code>library(e1071)
-load(&quot;data_subsamp.RData&quot;)</code></pre>
+<pre class="r"><code>load(&quot;data_subsamp.RData&quot;)</code></pre>
 <p>Read training set, save the index vector which will be used later to subsample from the training set</p>
 <pre class="r"><code>data_tr = read.csv(&quot;pml-training.csv&quot;,header=T)
 X = data_tr$X</code></pre>
+</div>
+<div id="clean-up-the-data" class="section level2">
+<h2>Clean up the data</h2>
 <p>Remove NA and “” columns</p>
 <pre class="r"><code>data_tr = data_tr[,-which(data_tr[1,]==&quot;&quot;)]
 data_tr = data_tr[,-which(is.na(data_tr[1,]))]</code></pre>
@@ -149,14 +151,17 @@ data_te=data_te[,-c(1:7)]</code></pre>
 <pre><code>## [1] 19622    53</code></pre>
 <pre class="r"><code>dim(data_te)</code></pre>
 <pre><code>## [1] 20 53</code></pre>
-<p>Since the training set is very large and memory prohibiting for some computers, I will sample 1000 rows randomly from the training set</p>
+</div>
+<div id="train-a-random-forests-classifier" class="section level2">
+<h2>Train a random forests classifier</h2>
+<p>Since the training set is very large and memory prohibiting for some computers, I will sample 1000 rows randomly from the training set and use that instead of the full data set</p>
 <pre class="r"><code>samp = sample(X,1000)
 data_tr = data_tr[samp,]</code></pre>
 <p>Set up a 10-fold cross validation</p>
 <pre class="r"><code>ctrl &lt;- trainControl(method = &quot;repeatedcv&quot;, number = 10, savePredictions = TRUE)</code></pre>
-<p>Train using random forests and using all features</p>
+<p>Build a model using random forests and using all features</p>
 <pre class="r"><code>rfmodel2 = train(data_tr$classe ~., data = data_tr, method = &quot;rf&quot;, verbose = FALSE, trControl=ctrl)</code></pre>
-<p>Here is the result of the built model. It shows that the best accuracy was obtained for mtry = 2 with accuracy of 0.89.This accuracy also considers the out-of-sample error using cross validation.</p>
+<p>Here is the result of the built model. It shows that the best accuracy was obtained for mtry = 2 with accuracy of 0.89.This model also accounts for the out-of-sample error using cross validation.</p>
 <pre class="r"><code>print(rfmodel2)</code></pre>
 <pre><code>## Random Forest 
 ## 
@@ -190,7 +195,6 @@ data_tr = data_tr[samp,]</code></pre>
 <pre class="r"><code>pred</code></pre>
 <pre><code>##  [1] B A B A A E D D A A C C B A E E A B B B
 ## Levels: A B C D E</code></pre>
-<p>This prediction is 90% accurate (I got 18/20 values right on the quiz) so it’s not bad given the limited number of samples used.</p>
 </div>
 
 

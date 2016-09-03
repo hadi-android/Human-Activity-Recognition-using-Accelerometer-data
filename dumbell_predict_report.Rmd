@@ -9,13 +9,12 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## Load the reuiqred libraries and read in the data files
 
 Clear all variables and load the required libraries
 ```{r, warning=FALSE}
 rm(list=ls(all=T))
 library(caret)
-library(e1071)
 load("data_subsamp.RData")
 ```
 
@@ -25,6 +24,7 @@ data_tr = read.csv("pml-training.csv",header=T)
 X = data_tr$X
 ```
 
+## Clean up the data
 Remove NA and "" columns
 ```{r}
 data_tr = data_tr[,-which(data_tr[1,]=="")]
@@ -53,7 +53,9 @@ dim(data_tr)
 dim(data_te)
 ```
 
-Since the training set is very large and memory prohibiting for some computers, I will sample 1000 rows randomly from the training set 
+
+## Train a random forests classifier
+Since the training set is very large and memory prohibiting for some computers, I will sample 1000 rows randomly from the training set and use that instead of the full data set
 ```{r}
 samp = sample(X,1000)
 data_tr = data_tr[samp,]
@@ -64,12 +66,12 @@ Set up a 10-fold cross validation
 ctrl <- trainControl(method = "repeatedcv", number = 10, savePredictions = TRUE)
 ```
 
-Train using random forests and using all features
+Build a model using random forests and using all features
 ```{r, eval=FALSE}
 rfmodel2 = train(data_tr$classe ~., data = data_tr, method = "rf", verbose = FALSE, trControl=ctrl)
 ```
 
-Here is the result of the built model. It shows that the best accuracy was obtained for mtry = 2 with accuracy of 0.89.This accuracy also considers the out-of-sample error using cross validation.
+Here is the result of the built model. It shows that the best accuracy was obtained for mtry = 2 with accuracy of 0.89.This model also accounts for the out-of-sample error using cross validation.
 
 ```{r}
 print(rfmodel2)
@@ -83,6 +85,4 @@ pred = predict(rfmodel2,data_te[,-53])
 ```{r}
 pred
 ```
-
-This prediction is 90% accurate (I got 18/20 values right on the quiz) so it's not bad given the limited number of samples used.
 
